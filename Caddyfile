@@ -1,0 +1,21 @@
+dist.localhost {
+    tls internal
+    root * /srv/dist
+    encode gzip
+    file_server
+}
+
+dev.localhost {
+  tls internal
+
+  handle /api* {
+    reverse_proxy http://192.168.0.3:8081
+  }
+
+  handle {
+    reverse_proxy https://192.168.0.3:8080 {
+        transport http {
+          tls_insecure_skip_verify
+        }
+    }
+}

@@ -9,10 +9,11 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
-    "easymde": "^2.18.0",
+    "date-fns": "^2.22.1",
     "net": "^1.0.2",
     "register-service-worker": "^1.7.2",
-    "vue": "^3.2.13"
+    "vue": "^3.2.13",
+    "vue-easymde": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

@@ -1,6 +1,0 @@
-localhost {
-    tls internal
-    root * /srv
-    encode gzip
-    file_server
-}
