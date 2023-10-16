@@ -1,7 +1,7 @@
 <?php
 require_once 'classes/FileService.php';
 
-$root = '/var/www/html/root';
+require_once 'config.php';
 $fileService = new FileService($root);
 
 header('Content-Type: application/json');

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <vue-easymde v-model="fileOfTheDayContent"></vue-easymde>
+    <vue-easymde ref="easymde" v-model="fileOfTheDayContent" :configs="editorConfigs" @keydown="handleLineBreaks"></vue-easymde>
     <server-status ref="ServerStatus" /><button @click="toggleServerConfigModal">⚙️</button>
     <server-config-modal v-if="isServerConfigModalVisible" @close="hideServerConfigModal" />
   </div>
@@ -15,6 +15,8 @@ import ServerConfigModal from '@/components/ServerConfigModal.vue';
 import ServerStatus from '@/components/ServerStatus.vue';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import '@fortawesome/fontawesome-free/css/all.css';
+
 
 export default {
   components: {
@@ -27,9 +29,13 @@ export default {
       isServerConfigModalVisible: false,
       fileOfTheDayContent: '',
       lastSavedContent: '',
-      configs: {
+      lastKeyPressed: null,
+      editorConfigs: {
+        autofocus: true,
+        spellChecker: false,
         status: false,
-      }
+        autoDownloadFontAwesome: false,
+      },
     };
   },
   methods: {
@@ -117,6 +123,20 @@ date: ${currentDate}
 description: ""
 ---\n`;
     },
+    handleLineBreaks(event) {
+      const cursorPosition = this.$refs.easymde.easymde.codemirror.getCursor();
+
+      if (event.key === 'Enter') {
+        if (this.lastKeyPressed === 'Enter') {
+          const currentTime = new Date().toLocaleTimeString()+': ';
+          console.log(cursorPosition);
+          this.$refs.easymde.easymde.codemirror.replaceSelection(currentTime);
+        }
+      }
+
+      this.lastKeyPressed = event.key;
+    },
+
   },
   mounted() {
     const serverConfig = JSON.parse(localStorage.getItem('serverConfig'));

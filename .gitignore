@@ -25,3 +25,5 @@ pnpm-debug.log*
 
 /caddydata
 /data
+/deploy
+/public/realconfig.php
