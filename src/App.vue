@@ -1,14 +1,15 @@
 <template>
   <div>
-    <vue-easymde ref="easymde" v-model="fileOfTheDayContent" :configs="editorConfigs" @keydown="handleLineBreaks"></vue-easymde>
+    <vue-easymde ref="easymde" v-model="fileOfTheDayContent" :configs="editorConfigs"
+      @keydown="handleLineBreaks"></vue-easymde>
     <server-status ref="ServerStatus" /><button @click="toggleServerConfigModal">⚙️</button>
     <server-config-modal v-if="isServerConfigModalVisible" @close="hideServerConfigModal" />
   </div>
 </template>
 
 <script>
-const AUTO_SAVE_INTERVAL = 500;
-const INACTIVITY_THRESHOLD = 30000;
+const AUTO_SAVE_INTERVAL = 30000;
+const INACTIVITY_THRESHOLD = 1000;
 
 import VueEasymde from 'vue-easymde';
 import ServerConfigModal from '@/components/ServerConfigModal.vue';
@@ -30,6 +31,7 @@ export default {
       fileOfTheDayContent: '',
       lastSavedContent: '',
       lastKeyPressed: null,
+      modified: false,
       editorConfigs: {
         autofocus: true,
         spellChecker: false,
@@ -84,6 +86,7 @@ export default {
           .then(response => {
             if (response.ok) {
               this.lastSavedContent = content;
+              this.modified = false;
             } else {
               throw new Error('Failed to save content to server');
             }
@@ -112,24 +115,30 @@ export default {
         }, INACTIVITY_THRESHOLD);
       });
 
+      document.addEventListener('keypress', () => {
+        clearTimeout(inactivityTimeout);
+        inactivityTimeout = setTimeout(() => {
+          this.saveContentToServer();
+        }, INACTIVITY_THRESHOLD);
+      });
+
     },
     initializeFileOfTheDayContent() {
       const currentDate = format(new Date(), "dd MMMM yyyy", { locale: fr });
+      const currentTime = new Date().toLocaleTimeString().substring(0, 5) + ' — ';
 
       return `---
 layout: post
 title: "Journal de bord"
 date: ${currentDate}
 description: ""
----\n`;
+---\n
+${currentTime} `;
     },
     handleLineBreaks(event) {
-      const cursorPosition = this.$refs.easymde.easymde.codemirror.getCursor();
-
       if (event.key === 'Enter') {
         if (this.lastKeyPressed === 'Enter') {
-          const currentTime = new Date().toLocaleTimeString()+': ';
-          console.log(cursorPosition);
+          const currentTime = new Date().toLocaleTimeString().substring(0, 5) + ' — ';
           this.$refs.easymde.easymde.codemirror.replaceSelection(currentTime);
         }
       }
